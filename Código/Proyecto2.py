@@ -1,3 +1,4 @@
+import random
 import tkinter as tk
 from tkinter import * 
 from PIL import Image, ImageTk, ImageOps  
@@ -44,6 +45,11 @@ def ventanaPrincipal(e):
     boton_modo_normal.place(x=670, y=250)
 
 
+piezaActual = None
+posicionActual = (0, 5)  # Posición inicial (fila, columna)
+rotaciones = {pieza: 0 for pieza in ['I', 'J', 'L', 'O', 'S', 'T', 'Z']}
+puntajeTotal = 0
+
 
 formas = {
     1: [(0,0), (0,1), (1,0), (1,1)],
@@ -76,47 +82,106 @@ Salida: Retorna una matriz de 22x12 y guarda cada una de las casillas con su res
 Restricciones: 
 """
 def matriz():
-
     global valores
     valores = {}
 
     frameTablero = tk.LabelFrame(root, text="Tectris", padx=10, pady=10)
     frameTablero.pack(padx=20, pady=20)
 
-    global botones
-    botones = {}
+    global celdas
+    celdas = {}
 
     for fila in range(22):
         for columna in range(12):
-
-            button = tk.Button(frameTablero, width=3, height=1)
-            button.grid(row=fila, column=columna)
-            botones[(fila, columna)] = button
+            label = tk.Label(frameTablero, width=3, height=1, bd=1, relief="solid", bg="black")
+            label.grid(row=fila, column=columna)
+            celdas[(fila, columna)] = label
 
             if (columna == 0) or (columna == 11) or (fila == 0) or (fila == 21):
                 valores[(fila, columna)] = "+"
                 borde = ImageTk.PhotoImage(imagenBorde)
-                button.config(image=borde)
+                label.config(image=borde)
+                label.image = borde 
             else:
                 valores[(fila, columna)] = 0
+"""
+Nombre: generarPieza
+Entrada:
+Salida: Retorna un tetronimo aleatorio
+Restricciones:
+"""
+def generarPieza():
+    piezas = ["I", "J", "L", "O", "S", "T", "Z", "U"]
+    return random.choice(piezas)
+
 
 """
 Nombre: ponerPiezas
-Entrada:
-Salida:
+Entrada: la pieza y las coordenadas en la matriz
+Salida: 
 Restricciones:
 """
-#def ponerPiezas(tablero, pieza, fila, columna):
-
-    #for coorX, coorY in matriz:
-
-
-
+def ponerPiezas(pieza, fila, columna):
+    global valores
+    forma = formas[pieza]
     
+    for x1, y1 in forma:
+        x2, y2 = fila + x1, columna + y1
+        if 0 <= x2 < 22 and 0 <= y2 < 12:
+            valores[(x2, y2)] = 1
+            img = ImageTk.PhotoImage(imagenes[pieza])
+            botones[(x2, y2)].config(image=img)
+            botones[(x2, y2)].image = img  
 
 
+"""
+Nombre: moverPieza
+Entrada: La direccion a la cual se desea mover la pieza
+Salida: Confirmar que el movimiento se puede hacer
+Restricciones: El parámetro debe ser un movimiento valido
+"""
+def moverPieza(direccion):
+    global piezaActual, posicionActual
+    
+    nuevaPosicion = nuevaPosicionPieza(posicionActual, direccion)
+    
+    if verificarColision(nuevaPosicion):
+        return False
+    
+    posicionActual = nuevaPosicion
+    actualizarTablero()
+    return True
 
+"""
+Nombre: nuevaPosicionPieza
+Entrada: La posicion actual y la direccion que se quiere mover
+Salida: mueve la pieza de posicion en la matriz
+Restricciones: los parámetros deben ser validos
+"""
+def nuevaPosicionPieza(posicion, direccion):
+    x, y = posicion
+    if direccion == 'izquierda':
+        return (x, y-1)
+    elif direccion == 'derecha':
+        return (x, y+1)
+    elif direccion == 'abajo':
+        return (x+1, y)
+    return posicion
 
+"""
+Nombre: verificarColision
+Entrada: la posicion a la cual se quiere haccer el movimiento
+Salida: True si 
+"""
+def verificarColision(nuevaPosicion):
+    x, y = nuevaPosicion
+    formaActual = formas[piezaActual][rotaciones[piezaActual]]
+    
+    for x1, y1 in formaActual:
+        x2, y2 = x + x1, y + y1
+        if x2 < 0 or x2 >= 22 or y2 < 0 or y2 >= 12 or valores[(x2, y2)] != 0:
+            return True
+    return False
 
 
 """
