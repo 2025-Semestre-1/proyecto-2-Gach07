@@ -4,3 +4,8 @@
 
 ### Estado del proyecto: Regular
 ### Enlace del video: 
+
+
+#####Agregado fuera de tiempo#####
+
+Este programa lo desarrolle en VScode por lo cual para las imagenes necesitaba la ruta de acceso absoluta, si hay algun problema con ello puedo modificarlo y proporcionar solo con nombres de las imagenes
